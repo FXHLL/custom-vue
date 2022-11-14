@@ -1,7 +1,7 @@
 // 依赖类 每个被监听的数据都有一个对应的依赖实例
 // 数据被访问时，缓存访问函数作为依赖于依赖列表中
 // 数据被改变时，依次调用缓存的依赖
-class Dep {
+export class Dep {
     // 依赖列表
     constructor () {
         this.depList = new Set()
