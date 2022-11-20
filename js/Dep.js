@@ -13,10 +13,9 @@ export default class Dep {
         }
     }
     // 执行缓存依赖
-    notify (newVal) {
-      console.log('notify:',newVal)
+    notify (newVal,oldVal) {
         this.depList.forEach(item => {
-          item.run(newVal)
+            item.run(newVal,oldVal)
       })
     }
 }

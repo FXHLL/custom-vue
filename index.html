@@ -24,16 +24,19 @@
     const vm = new Vue({
       el: '#app',
       data: {
-        title: 111
+        title: '标题1',
+        content: '内容1'
       },
       watch: {
-        count(val) {
-          console.log('watch触发,新值为：', val)
+        title(newVal,oldVal) {
+          console.log('新:', newVal,'旧:',oldVal)
         }
       }
     })
-    vm.title++
-    vm.title = 6
+    // watch实现
+    vm.title = '标题2'
+    vm.$watch('content',(newVal,oldVal) => { console.log('新:', newVal,'旧:',oldVal) })
+    vm.content = '内容2'
   </script>
 </body>
 

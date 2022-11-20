@@ -16,6 +16,7 @@
 
 let watcherId = 0
 let watcherQueue = new Set([])
+let count = 0
 export default class Watcher {
   constructor(vm, key, callback) {
     this.vm = vm
@@ -30,10 +31,10 @@ export default class Watcher {
     this.vm[this.key]
     window.target = null
   }
-  run(newVal) {
+  run(newVal,oldVal) {
     watcherQueue.add(this.id)
     Promise.resolve().then(res => {
-      this.callback.call(this.vm, newVal)
+      this.callback.call(this.vm, newVal,oldVal)
       watcherQueue.delete(this.id)
     })
 

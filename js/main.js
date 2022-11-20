@@ -6,11 +6,10 @@
  * @FilePath: \youyu\custom-vue\js\main.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
-import Observer from './Observer.js'
+import {Observer,handleDefineProperty} from './Observer.js'
 import Watcher from './Watcher.js'
 export default class Vue {
   constructor(options) {
-    console.log(options.data)
     this.$options = options
     this.$data = options.data
     // 代理this属性为data
@@ -21,14 +20,13 @@ export default class Vue {
     this.initWatch(options.watch)
   }
   initData() {
-    console.log(Object.keys(this.$data))
+    let oldData = this.$data
     Object.keys(this.$data).forEach(key => {
       Object.defineProperty(this, key, {
         enumerable: true,
         configurable: true,
         get() {
-          console.log(key,this.$data.title)
-          return this.$data[key]
+          return oldData[key]
         },
         set(newVal) {
           this.$data[key] = newVal
@@ -43,5 +41,9 @@ export default class Vue {
   }
   $watch(key, callback) {
     new Watcher(this, key, callback)
+  }
+  $set(obj,key,value) {
+    handleDefineProperty(obj,key,value)
+    obj.__ob__.dep.notify()
   }
 }

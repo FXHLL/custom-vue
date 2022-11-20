@@ -4,14 +4,13 @@
 1. 依赖收集
 2. 响应式驱动
 3. render
-4. vuex
 ...
 
-目前思路：
-new Vue({
-    el:'挂载元素',
-    data:'data',
-    render: h(a,b,c)
-})
-对data进行数据监听，依赖[computed,render...]收集
-数据改变时，依赖[computed,render...]触发
+main.js     创建vue实例入口
+Observer.js 为实例data的key进行监听，创建单独的dep实例，实现了自动依赖收集执行系统
+Dep.js      依赖类，维护了观察key的依赖列表，提供了新增执行操作
+Watcher.js  观察者类，每个需要根据被观察key更新所更新的函数都要创建一个实例，
+            通过访问被观察key注册此依赖函数，通过dep通知且维护一个执行队列，创建微任务执行更新函数
+
+目前实现：
+1.  依赖收集
