@@ -2,7 +2,7 @@
  * @Author: Fangxh 1745955087@qq.com
  * @Date: 2022-11-14 10:06:34
  * @LastEditors: Fangxh 1745955087@qq.com
- * @LastEditTime: 2022-11-24 16:45:57
+ * @LastEditTime: 2022-11-24 16:54:26
  * @FilePath: \youyu\custom-vue\js\Watcher.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -40,6 +40,9 @@ export default class Watcher {
     }
     this.id = watcherId++
     this.emitGetter()
+    if (config.immediate) {
+      this.run()
+    }
   }
   emitGetter() {
     // 通过保存在class静态属性上实现了Dep的捕获当前watcher
@@ -94,9 +97,10 @@ export default class Watcher {
   run() {
     watcherQueue.add(this.id)
     Promise.resolve().then(res => {
-      this.callback.call(this.vm, this.vm[this.key], this.oldVal)
+      const oldVal = this.oldVal
       // 值更新了在回调执行后更新旧值
       this.oldVal = this.vm[this.key]
+      this.callback.call(this.vm, this.vm[this.key], oldVal)
       watcherQueue.delete(this.id)
     })
 
