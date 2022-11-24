@@ -2,7 +2,7 @@
  * @Author: Fangxh 1745955087@qq.com
  * @Date: 2022-11-14 09:19:23
  * @LastEditors: Fangxh 1745955087@qq.com
- * @LastEditTime: 2022-11-21 17:42:35
+ * @LastEditTime: 2022-11-24 16:40:45
  * @FilePath: \youyu\custom-vue\js\Observer.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -69,6 +69,7 @@ function handleProxy(data, key, oldVal) {
     },
     set(newVal) {
       if (oldVal !== newVal) {
+        oldVal = newVal
         // 新值是否需要 创建监听实例
         handleType(newVal)
         // 用新值执行缓存依赖

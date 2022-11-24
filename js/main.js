@@ -2,7 +2,7 @@
  * @Author: Fangxh 1745955087@qq.com
  * @Date: 2022-11-14 09:19:23
  * @LastEditors: Fangxh 1745955087@qq.com
- * @LastEditTime: 2022-11-21 13:36:38
+ * @LastEditTime: 2022-11-24 16:19:19
  * @FilePath: \youyu\custom-vue\js\main.js
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
  */
@@ -20,13 +20,12 @@ export default class Vue {
     this.initWatch(options.watch)
   }
   initData() {
-    let oldData = this.$data
     Object.keys(this.$data).forEach(key => {
       Object.defineProperty(this, key, {
         enumerable: true,
         configurable: true,
         get() {
-          return oldData[key]
+          return this.$data[key]
         },
         set(newVal) {
           this.$data[key] = newVal
