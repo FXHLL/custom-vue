@@ -2,7 +2,7 @@
  * @Author: Fangxh 1745955087@qq.com
  * @Date: 2022-11-18 09:43:42
  * @LastEditors: Fangxh 1745955087@qq.com
- * @LastEditTime: 2022-11-24 16:54:53
+ * @LastEditTime: 2022-11-25 11:42:16
  * @FilePath: \youyu\custom-vue\index.html
  * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
 -->
@@ -26,34 +26,51 @@
       data: {
         key1: '111',
         key2: '222',
-        key3: {a:0,b:{a1:1,b1:1,c1:{a2:2,b2:2,c2:2}}},
-        key4: [{a:1,b:2},{x:1,y:2,z:{z1:1}}]
+        key3: { a: 0, b: { a1: 1, b1: 1, c1: { a2: 2, b2: 2, c2: 2 } } },
+        key4: [{ a: 1, b: 2 }, { x: 1, y: 2, z: { z1: 1 } }]
       },
       watch: {
         key1(newVal, oldVal) {
-          console.log('key1发生了变化','新:', newVal, '旧:', oldVal)
+          console.log('key1发生了变化', '新:', newVal, '旧:', oldVal)
         },
         key3: {
           handler(newVal) {
-            console.log('嵌套对象发生了变化',newVal)
+            console.log('嵌套对象发生了变化', newVal)
           },
           immediate: true,
-          deep:true
+          deep: true
         },
         key4: {
           handler(newVal) {
-            console.log('对象数组发生了变化',newVal)
+            console.log('对象数组发生了变化', newVal)
           },
-          deep:true
+          deep: true
+        },
+        customKey(newVal, oldVal) {
+          console.log('计算属性发生了变化', newVal, oldVal)
         }
-
+      },
+      computed: {
+        customKey() {
+          return this.key1 + this.key2
+        }
       }
     })
-    vm.key1 = '1111'
-    vm.$watch('key2',function(newVal,oldVal){ console.log('key2发生了变化','新:', newVal, '旧:', oldVal) })
-    vm.key2 = '2222'
-    vm.key3.b.c1.b2 = 22
-    vm.key4[0].b = 22
+    if (0) {
+      vm.key1 = '1111'
+      vm.$watch('key2', function (newVal, oldVal) { console.log('key2发生了变化', '新:', newVal, '旧:', oldVal) })
+      vm.key2 = '2222'
+      vm.key3.b.c1.b2 = 22
+      vm.key4[0].b = 22
+    }
+    if (1) {
+      console.log(vm.customKey)
+      console.log(vm.customKey)
+      vm.key1 = '000'
+      console.log(vm.customKey)
+      console.log(vm.customKey)
+    }
+
   </script>
 </body>
 

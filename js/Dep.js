@@ -6,16 +6,20 @@ export default class Dep {
     constructor () {
         this.depList = new Set([])
     }
-    // 存入 当前线程 执行的依赖
+    // 通知watcher存入当前依赖
     depend () {
         if(window.target) {
-            this.depList.add(window.target)
+            // this.depList.add(window.target)
+            this.
         }
     }
+    addDep (target) {
+      this.depList.add(target)
+    }
     // 执行缓存依赖
-    notify (newVal,oldVal) {
+    notify () {
         this.depList.forEach(item => {
-            item.run(newVal,oldVal)
+            item.update()
       })
     }
 }

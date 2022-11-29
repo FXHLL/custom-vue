@@ -1,34 +1,46 @@
-/*
- * @Author: Fangxh 1745955087@qq.com
- * @Date: 2022-11-14 09:19:23
- * @LastEditors: Fangxh 1745955087@qq.com
- * @LastEditTime: 2022-11-24 16:19:19
- * @FilePath: \youyu\custom-vue\js\main.js
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
- */
 import {Observer,handleProxy} from './Observer.js'
 import Watcher from './Watcher.js'
 export default class Vue {
   constructor(options) {
     this.$options = options
-    this.$data = options.data
-    // 代理this属性为data
-    this.initData()
-    // 对data设置监听
-    new Observer(options.data)
-    // 注册watcher
+    // 注册data:  代理实例访问，设置监听器
+    this.initData(options.data)
+    // 注册computed:  代理实例访问，设置watcher
+    this.initComputed(options.computed)
+    // 注册watcher:   设置watcher
     this.initWatch(options.watch)
   }
-  initData() {
-    Object.keys(this.$data).forEach(key => {
+  initData(obj) {
+    Object.keys(obj).forEach(key => {
       Object.defineProperty(this, key, {
         enumerable: true,
         configurable: true,
         get() {
-          return this.$data[key]
+          return obj[key]
         },
         set(newVal) {
-          this.$data[key] = newVal
+          obj[key] = newVal
+        }
+      })
+    })
+    new Observer(obj)
+  }
+  initComputed(obj) {
+    Object.keys(obj).forEach(key => {
+      const watcher = new Watcher(this, obj[key], ()=>{}, {lazy:true})
+      Object.defineProperty(this, key, {
+        enumerable: true,
+        configurable: true,
+        get() {
+          if(watcher.dirty) {
+            console.log('computed求值')
+            watcher.get()
+            watcher.dirty = false
+          }
+          return watcher.value
+        },
+        set() {
+          console.warn('no no no set')
         }
       })
     })
@@ -43,6 +55,6 @@ export default class Vue {
   }
   $set(obj,key,value) {
     handleProxy(obj,key,value)
-    obj.__ob__.dep.notify(obj,obj)
+    obj.__ob__.dep.notify()
   }
 }

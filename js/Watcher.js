@@ -1,11 +1,3 @@
-/*
- * @Author: Fangxh 1745955087@qq.com
- * @Date: 2022-11-14 10:06:34
- * @LastEditors: Fangxh 1745955087@qq.com
- * @LastEditTime: 2022-11-24 16:54:26
- * @FilePath: \youyu\custom-vue\js\Watcher.js
- * @Description: 这是默认设置,请设置`customMade`, 打开koroFileHeader查看配置 进行设置: https://github.com/OBKoro1/koro1FileHeader/wiki/%E9%85%8D%E7%BD%AE
- */
 /**
  * 对于每个data-key都有一个依赖dep
  * getter 收集watcher入dep   setter 执行dep中所有watcher
@@ -22,85 +14,97 @@
  * 同步结束了，微任务执行，render更新了
  */
 
+// 维护一个队列，对应异步队列，防止异步任务重复执行
 let watcherId = 0
 let watcherQueue = new Set([])
-let count = 0
+// 维护一个栈，记录watcher
+let targetStack = []
+
+// 数据处理，对数组或者对象进行遍历处理
+const isA = function (data) {
+  return Object.prototype.toString.call(data) === '[object Array]'
+}
+const isO = function (data) {
+  return Object.prototype.toString.call(data) === '[object Object]'
+}
+const loopObj = function (data) {
+  for (let key in data) {
+    if (isO(data[key])) {
+      loopObj(data[key])
+    }
+  }
+}
+const loopArr = function (data) {
+  data.forEach(item => {
+    if (isA(item)) {
+      loopArr(item)
+    }
+    if (isO(item)) {
+      loopObj(item)
+    }
+  })
+}
+
 export default class Watcher {
-  constructor(vm, key, config) {
+  constructor(vm, express, config, tag = { lazy: false }) {
     this.vm = vm
-    this.key = key
-    // 判断配置项存于watcher实例上
-    if (typeof config === 'function') {
-      this.callback = config
-    }
-    if (Object.prototype.toString.call(config) === '[object Object]') {
-      this.callback = config.handler
-      this.deep = config.deep
-      this.immediate = config.immediate
-    }
+    this.express = express
+    this.lazy = this.dirty = tag.lazy
     this.id = watcherId++
-    this.emitGetter()
-    if (config.immediate) {
+    this.depList = []
+    switch (Object.prototype.toString.call(config)) {
+      case '[object Function]':
+        this.callback = config
+        break
+      case '[object Object]':
+        this.callback = config.handler
+        this.deep = config.deep
+        this.immediate = config.immediate
+        break
+    }
+    if (!this.lazy) {
+      this.get()
+    }
+    if (config.immediate) this.run()
+  }
+  addDep(dep) {
+    if (this.depList.indexOf(dep) === -1) {
+      this.depList.push(dep)
+      dep.addDep(this)
+    }
+  }
+  update() {
+    // lazy被dep通知执行时，只会标记成脏值
+    if (this.lazy) {
+      this.dirty = true
+    } else {
       this.run()
     }
   }
-  emitGetter() {
-    // 通过保存在class静态属性上实现了Dep的捕获当前watcher
+  get() {
+    targetStack.push(this)
     window.target = this
-    /**
-     * deep的实现：
-     * emitGetter 通过访问key值使得key对应的dep收集了依赖
-     * 指定deep:true 且key为对象或数组时
-     * 对象：我们应该遍历对象key访问，使其dep收集依赖
-     * 数组：我们需要遍历数组，如果数组元素为普通值则跳过，如果为对象则遍历子属性使其dep收集依赖
-     * 
-     * 发现这样虽然触发了watcher但是newVal,oldVal是修改子元素的，并非想要的大元素 ？？？
-     */
-    const data = this.vm[this.key]
-    // 将旧值缓存在watcher上
-    this.oldVal = data
-    if (this.deep) {
-      const isA = function(data) {
-        return Object.prototype.toString.call(data) === '[object Array]'
-      }
-      const isO = function(data) {
-        return Object.prototype.toString.call(data) === '[object Object]'
-      }
-      const loopObj = function (data) {
-        for (let key in data) {
-          if (isO(data[key])) {
-            loopObj(data[key])
-          }
-        }
-      }
-      const loopArr = function (data) {
-        data.forEach(item => {
-          if(isA(item)) {
-            loopArr(item)
-          }
-          if(isO(item)) {
-            loopObj(item)
-          }
-        })
-      }
-      if(isO(data)) {
-        loopObj(data)
-      }
-      if(isA(data)) {
-        loopArr(data)
+    // computed / watch 通过使用data中的值达成对应dep收集
+    if (typeof this.express === 'function') {
+      this.value = this.express.call(this.vm) // 更新值
+    } else {
+      this.value = this.vm[this.express] // 记录旧值
+      if (this.deep) {
+        if (isO(this.value)) loopObj(this.value) // 对象：访问key，使其dep收集依赖
+        if (isA(this.value)) loopArr(this.value) // 数组：搜索所有层级的对象，访问key使其dep收集依赖
       }
     }
-
-
-    window.target = null
+    targetStack.pop()
+    window.target = targetStack.length
+      ? targetStack[targetStack.length - 1]
+      : null
   }
   run() {
     watcherQueue.add(this.id)
     Promise.resolve().then(res => {
-      const oldVal = this.oldVal
-      // 值更新了在回调执行后更新旧值
-      this.oldVal = this.vm[this.key]
-      this.callback.call(this.vm, this.vm[this.key], oldVal)
+      const oldValue = this.value
+      this.value = this.vm[this.express]
+      this.callback.call(this.vm, this.vm[this.express], oldValue)
       watcherQueue.delete(this.id)
     })
 
