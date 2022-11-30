@@ -4,21 +4,26 @@
 export default class Dep {
     // 依赖列表
     constructor () {
-        this.depList = new Set([])
+        this.watcherList = new Set([])
     }
-    // 通知watcher存入当前依赖
+    /**
+     * 1.data-getter触发调用对应dep.depend()收集
+     * 2.dep.depend()通知当前注册的watcher.addDep去收集dep
+     * 3.watcher.addDep收集完成后再去通知dep.addWatcher收集watcher
+     * 
+     * 至此依赖收集完成，dep与watcher完成了双向收集
+     */
     depend () {
-        if(window.target) {
-            // this.depList.add(window.target)
-            this.
-        }
+      if(window.target) {
+          window.target.addDep(this)
+      }
     }
-    addDep (target) {
-      this.depList.add(target)
+    addWatcher (target) {
+      this.watcherList.add(target)
     }
     // 执行缓存依赖
     notify () {
-        this.depList.forEach(item => {
+        this.watcherList.forEach(item => {
             item.update()
       })
     }

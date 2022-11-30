@@ -1,4 +1,4 @@
-import {Observer,handleProxy} from './Observer.js'
+import { Observer, handleProxy } from './Observer.js'
 import Watcher from './Watcher.js'
 export default class Vue {
   constructor(options) {
@@ -27,15 +27,24 @@ export default class Vue {
   }
   initComputed(obj) {
     Object.keys(obj).forEach(key => {
-      const watcher = new Watcher(this, obj[key], ()=>{}, {lazy:true})
+      const watcher = new Watcher(this, obj[key], () => { }, { lazy: true })
       Object.defineProperty(this, key, {
         enumerable: true,
         configurable: true,
         get() {
-          if(watcher.dirty) {
+          if (watcher.dirty) {
             console.log('computed求值')
             watcher.get()
             watcher.dirty = false
+          }
+          // watch监听computed时，注册依赖中注册依赖
+          // watch注册依赖时会访问computed,
+          // 因此computed先注册了对应依赖项
+          // 此时再次检测全局watcher容器去重新把watch也执行注册依赖操作
+          if (window.target) {
+            watcher.depList.forEach(item => {
+              item.depend()
+            })
           }
           return watcher.value
         },
@@ -53,8 +62,8 @@ export default class Vue {
   $watch(key, callback) {
     new Watcher(this, key, callback)
   }
-  $set(obj,key,value) {
-    handleProxy(obj,key,value)
+  $set(obj, key, value) {
+    handleProxy(obj, key, value)
     obj.__ob__.dep.notify()
   }
 }
