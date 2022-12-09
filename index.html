@@ -17,62 +17,66 @@
 </head>
 
 <body>
-  <div id="app">
+  <div id="app" style="color: white;">
     <h1>{{key1}}</h1> 文本节点{{key2}}
     <div>{{key3}}</div>
   </div>
 
   <script type="module">
-    import Vue from './js/main.js'
-    const vm = new Vue({
-      el: '#app',
-      data: {
-        key1: '111',
-        key2: '222',
-        key3: { a: 0, b: { a1: 1, b1: 1, c1: { a2: 2, b2: 2, c2: 2 } } },
-        key4: [{ a: 1, b: 2 }, { x: 1, y: 2, z: { z1: 1 } }]
-      },
-      watch: {
-        key1(newVal, oldVal) {
-          console.log('key1发生了变化', '新:', newVal, '旧:', oldVal)
-        },
-        key3: {
-          handler(newVal) {
-            console.log('嵌套对象发生了变化', newVal)
-          },
-          immediate: true,
-          deep: true
-        },
-        key4: {
-          handler(newVal) {
-            console.log('对象数组发生了变化', newVal)
-          },
-          deep: true
-        },
-        customKey(newVal, oldVal) {
-          console.log('计算属性发生了变化', newVal, oldVal)
-        }
-      },
-      computed: {
-        customKey() {
-          return this.key1 + this.key2
-        }
-      }
-    })
-    if (0) {
-      vm.key1 = '1111'
-      vm.$watch('key2', function (newVal, oldVal) { console.log('key2发生了变化', '新:', newVal, '旧:', oldVal) })
-      vm.key2 = '2222'
-      vm.key3.b.c1.b2 = 22
-      vm.key4[0].b = 22
-    }
-    if (1) {
-      console.log(vm.customKey)
-      console.log(vm.customKey)
-      vm.key1 = '000'
-      console.log(vm.customKey)
-      console.log(vm.customKey)
-    }
+    // import Vue from './js/main.js'
+    // const vm = new Vue({
+    //   el: '#app',
+    //   data: {
+    //     key1: '111',
+    //     key2: '222',
+    //     key3: { a: 0, b: { a1: 1, b1: 1, c1: { a2: 2, b2: 2, c2: 2 } } },
+    //     key4: [{ a: 1, b: 2 }, { x: 1, y: 2, z: { z1: 1 } }]
+    //   },
+    //   watch: {
+    //     key1(newVal, oldVal) {
+    //       console.log('key1发生了变化', '新:', newVal, '旧:', oldVal)
+    //     },
+    //     key3: {
+    //       handler(newVal) {
+    //         console.log('嵌套对象发生了变化', newVal)
+    //       },
+    //       immediate: true,
+    //       deep: true
+    //     },
+    //     key4: {
+    //       handler(newVal) {
+    //         console.log('对象数组发生了变化', newVal)
+    //       },
+    //       deep: true
+    //     },
+    //     customKey(newVal, oldVal) {
+    //       console.log('计算属性发生了变化', newVal, oldVal)
+    //     }
+    //   },
+    //   computed: {
+    //     customKey() {
+    //       return this.key1 + this.key2
+    //     }
+    //   }
+    // })
+    // if (0) {
+    //   vm.key1 = '1111'
+    //   vm.$watch('key2', function (newVal, oldVal) { console.log('key2发生了变化', '新:', newVal, '旧:', oldVal) })
+    //   vm.key2 = '2222'
+    //   vm.key3.b.c1.b2 = 22
+    //   vm.key4[0].b = 22
+    // }
+    // if (1) {
+    //   console.log(vm.customKey)
+    //   console.log(vm.customKey)
+    //   vm.key1 = '000'
+    //   console.log(vm.customKey)
+    //   console.log(vm.customKey)
+    // }
+    import {parseHTML} from './generate/parse.js'
+
+    parseHTML(document.querySelector('#app').innerHTML)
+
 
   </script>
 </body>
