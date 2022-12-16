@@ -45,8 +45,13 @@ methods.forEach(item => {
 function handleProxy(data, key, oldVal) {
   // 存一个dep闭包
   let dep = new Dep()
-  // 若key值为对象则需监听对象key,返回找个监听实例,再将此key保存的依赖存于对象监听实例的dep中
-  // 因为对象新增属性时，并不能触发key set,故需要在对象上留有__ob__调用key的dep.notify
+  /* 
+    childOb是数组存的Observer实例
+    流程是：
+    data-key-getteer 收集依赖
+    通过获取数组的Observer实例去增加 数组的依赖
+    当数组变化时，数组拦截器可以通过此实例去访问依赖实例从而达成更新
+  */
   const childOb = handleType(oldVal)
   Object.defineProperty(data, key, {
     enumerable: true,
