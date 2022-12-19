@@ -17,9 +17,10 @@
 </head>
 
 <body>
-  <div id="app" style="color: white;">
+  <div id="app" style="color: pink;">
     <h1>{{key1}}</h1> 文本节点{{key2}}
     <div>{{key3}}</div>
+    <!-- 666 -->
   </div>
 
   <script type="module">
@@ -73,10 +74,10 @@
     //   console.log(vm.customKey)
     //   console.log(vm.customKey)
     // }
-    import {parseHTML} from './generate/parse.js'
+    import {parse} from './generate/parse.js'
 
-    parseHTML(document.querySelector('#app').innerHTML)
-
+    const ast = parse(document.querySelector('#app').outerHTML)
+    console.log(ast)
 
   </script>
 </body>

@@ -1,68 +1,152 @@
-/* 
-  parse:解析template,生成ast语法树
-*/
-function vnode(tag,data,children ) {
-  return {
-    tag,
-    data,
-    children
+// Template 转换 AST
+
+export function parse(html) {
+  // 根节点，模板取outerHTML故只有一个根节点
+  let root
+  // 此时的父元素
+  let currentParent
+  // 层级栈
+  let stack = []
+
+  // 模板处理钩子
+  const options = {
+    // 开始标签
+    start(tag, attrs, unary) {
+      let element = {
+        type: 1,
+        tag,
+        attrsList: attrs,
+        parent: currentParent,
+        children: []
+      }
+      if (!root) {
+        root = element
+      } else {
+        currentParent.children.push(element)
+      }
+      // 自闭和
+      if (!unary) {
+        stack.push(element)
+        currentParent = element
+      }
+    },
+    // 结束标签
+    end() {
+      stack.pop()
+      currentParent = stck[stack.length - 1]
+    },
+    // 文本
+    chars(text) {
+      let element = { type: 3, text }
+      currentParent.children.push(element)
+    },
+    // 注释
+    comment() {
+      let element = { type: 3, text, isComment: true }
+      currentParent.children.push(element)
+    }
   }
+  parseHTML(html, options)
+  return root
 }
 
-export function parseHTML(html) {
-  let reg = {
-    startTag: new RegExp(/^<([a-zA-Z_][\w\-]*)\s*>/),
-    endTag: new RegExp(/^<\/([a-zA-Z_][\w\-]*)\s*>/),
-    singleTag: new RegExp(/^<([a-zA-Z_][\w\-]*)\s*\/\s*>/),
-  }
-  // 开始标签进栈，结束标签出栈，这样就确认了嵌套关系
-  let stack = []
-  // 指针
-  let i = 0
-  // 指针移动方法
-  function addavte(n) {
-    i += n
-    html = html.slice(n)
-    console.log('-----html变化了', html)
-  }
-  // 对文本内容的处理
-  function handle(data) {
-    console.log('xxxxg内容处理', data)
-  }
-  console.log('-----初始html', html)
-  // 开始解析
-  while (html.length) {
-    if (reg.startTag.test(html)) {
-      const res = html.match(reg.startTag)
-      console.log('++++开始标签', res)
-      addavte(res[0].length)
-      stack.push(res[2])
-    }
-    else if (reg.endTag.test(html)) {
-      const res = html.match(reg.endTag)
-      console.log('++++结束标签', res)
-      stack.pop()
-      addavte(res[0].length)
-    }
-    else if (reg.singleTag.test(html)) {
-      const res = html.match(reg.singleTag)
-      console.log('++++单标签', res)
-    }
-    else {
-      const res = html.indexOf('<')
-      if (res !== -1) {
-        const content = html.slice(0, res)
-        console.log('++++文本内容', res)
-        handle(content)
-        addavte(res)
-      }else {
-        handle(html)
-        addavte(html.length)
+const regular = {
+  // 开始标签开始
+  startTagOpen: /^<((?:[a-zA-Z_][\w\-\.]*\:)?[a-zA-Z_][\w\-\.]*)/,
+  // 属性
+  attribute: /^\s*([^\s"'<>\/=]+)(?:\s*(=)\s*(?:"([^"]*)"+|'([^']*)'+|([^\s"'=<>`]+])))/,
+  // 开始标签结束
+  startTagClose: /^\s*(\/?)>/,
+  // 结束标签
+  endTag: /^<\/((?:[a-zA-Z_][\w\-\.]*\:])?[a-zA-Z_][\w\-\.]*)[^>]>/,
+  // 注释
+  annotation: /^<!--/
+}
+
+// 模板处理流程
+function parseHTML(html, options) {
+  let num = 50
+  while (html && num--) {
+    let textEnd = html.indexOf('<')
+    // 标签类
+    if (textEnd === 0) {
+      // 开始标签
+      if (regular.startTagOpen.test(html)) {
+        // debugger
+        const start = html.match(regular.startTagOpen)
+        if (start) {
+          // 标签名
+          const match = {
+            tagName: start[1],
+            attrs: []
+          }
+          html = html.slice(start[0].length)
+          console.log('干掉了开始',start[0])
+          let end, attr
+          // 属性
+          while (!(end = html.match(regular.startTagClose)) && (attr = html.match(regular.attribute))) {
+            html = html.slice(attr[0].length)
+            console.log('干掉了属性',attr[0])
+            match.attrs.push(attr)
+          }
+          // 结尾
+          if (end) {
+            match.unarySlash = end[1]
+            html = html.slice(end.length)
+            console.log('干掉了结尾',end[0])
+          }
+          const { tagName, attrs, unarySlash } = match
+          options.start(tagName, attrs, unarySlash)
+          continue
+        }
+
+      }
+      // 结束标签
+      if (regular.startTagClose.test(html)) {
+        console.log('结束标签')
+        const end = html.match(regular.startTagClose)
+        if (end) {
+          html = html.slice(end[0].length)
+          console.log('干掉了结束标签', end)
+          options.end(end[1])
+          continue
+        }
+      }
+      // 注释
+      if (regular.annotation.test(html)) {
+        console.log('注释')
+        const commentEnd = html.indexOf('-->')
+        if (commentEnd >= 0) {
+          options.comment(html.slice(4, commentEnd))
+          html.html.slice(commentEnd + 3)
+          console.log('干掉了注释',html.slice(0,commentEnd + 3))
+          continue
+        }
       }
 
-
     }
+    // 文本类
+    let text
+    if (textEnd > 0) {
+      console.log('干掉了文本 前',html)
+      text = html.slice(0, textEnd)
+      html = html.slice(textEnd)
+      console.log('干掉了文本',text)
+    }
+    if (textEnd < 0) {
+      text = html
+      html = ''
+      console.log('干掉了全部文本')
+    }
+    options.chars(text)
+    continue
   }
-
-
+  console.log(num)
 }
+
+
+
+
+
+
+
