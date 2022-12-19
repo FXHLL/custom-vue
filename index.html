@@ -20,6 +20,8 @@
   <div id="app" style="color: pink;">
     <h1>{{key1}}</h1> 文本节点{{key2}}
     <div>{{key3}}</div>
+    <custom type="text" />
+    <button>按钮</button>
     <!-- 666 -->
   </div>
 
@@ -75,9 +77,12 @@
     //   console.log(vm.customKey)
     // }
     import {parse} from './generate/parse.js'
+    
+    console.log(document.querySelector('#app').outerHTML)
+    console.log(document.querySelector('#app').innerHTML)
 
     const ast = parse(document.querySelector('#app').outerHTML)
-    console.log(ast)
+    console.dir(ast)
 
   </script>
 </body>

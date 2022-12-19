@@ -12,11 +12,18 @@ export function parse(html) {
   const options = {
     // 开始标签
     start(tag, attrs, unary) {
+      const obj = currentParent
+        ? Object.assign({},currentParent)
+        : undefined
+      if(obj) {
+        obj.children = '$$'
+      }
+      
       let element = {
         type: 1,
         tag,
         attrsList: attrs,
-        parent: currentParent,
+        parent: obj,
         children: []
       }
       if (!root) {
@@ -24,7 +31,7 @@ export function parse(html) {
       } else {
         currentParent.children.push(element)
       }
-      // 自闭和
+      // 非自闭和
       if (!unary) {
         stack.push(element)
         currentParent = element
@@ -33,7 +40,7 @@ export function parse(html) {
     // 结束标签
     end() {
       stack.pop()
-      currentParent = stck[stack.length - 1]
+      currentParent = stack[stack.length - 1]
     },
     // 文本
     chars(text) {
@@ -41,7 +48,7 @@ export function parse(html) {
       currentParent.children.push(element)
     },
     // 注释
-    comment() {
+    comment(text) {
       let element = { type: 3, text, isComment: true }
       currentParent.children.push(element)
     }
@@ -65,8 +72,8 @@ const regular = {
 
 // 模板处理流程
 function parseHTML(html, options) {
-  let num = 50
-  while (html && num--) {
+  console.log(html)
+  while (html) {
     let textEnd = html.indexOf('<')
     // 标签类
     if (textEnd === 0) {
@@ -85,14 +92,16 @@ function parseHTML(html, options) {
           let end, attr
           // 属性
           while (!(end = html.match(regular.startTagClose)) && (attr = html.match(regular.attribute))) {
+            // if(match.tagName === 'input') debugger
             html = html.slice(attr[0].length)
             console.log('干掉了属性',attr[0])
             match.attrs.push(attr)
           }
           // 结尾
           if (end) {
+            // if(match.tagName === 'input') debugger
             match.unarySlash = end[1]
-            html = html.slice(end.length)
+            html = html.slice(end[0].length)
             console.log('干掉了结尾',end[0])
           }
           const { tagName, attrs, unarySlash } = match
@@ -102,9 +111,8 @@ function parseHTML(html, options) {
 
       }
       // 结束标签
-      if (regular.startTagClose.test(html)) {
-        console.log('结束标签')
-        const end = html.match(regular.startTagClose)
+      if (regular.endTag.test(html)) {
+        const end = html.match(regular.endTag)
         if (end) {
           html = html.slice(end[0].length)
           console.log('干掉了结束标签', end)
@@ -114,11 +122,10 @@ function parseHTML(html, options) {
       }
       // 注释
       if (regular.annotation.test(html)) {
-        console.log('注释')
         const commentEnd = html.indexOf('-->')
         if (commentEnd >= 0) {
           options.comment(html.slice(4, commentEnd))
-          html.html.slice(commentEnd + 3)
+          html = html.slice(commentEnd + 3)
           console.log('干掉了注释',html.slice(0,commentEnd + 3))
           continue
         }
@@ -128,9 +135,9 @@ function parseHTML(html, options) {
     // 文本类
     let text
     if (textEnd > 0) {
-      console.log('干掉了文本 前',html)
       text = html.slice(0, textEnd)
       html = html.slice(textEnd)
+      // if(text === '{{key1}}') debugger
       console.log('干掉了文本',text)
     }
     if (textEnd < 0) {
@@ -141,7 +148,6 @@ function parseHTML(html, options) {
     options.chars(text)
     continue
   }
-  console.log(num)
 }
 
 
