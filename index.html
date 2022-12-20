@@ -19,8 +19,8 @@
 <body>
   <div id="app" style="color: pink;">
     <h1>{{key1}}</h1> 文本节点{{key2}}
-    <div>{{key3}}</div>
-    <custom type="text" />
+    <div><span>静态节点</span></div>
+    <input type="text"/>
     <button>按钮</button>
     <!-- 666 -->
   </div>
@@ -76,14 +76,13 @@
     //   console.log(vm.customKey)
     //   console.log(vm.customKey)
     // }
-    import {parse} from './generate/parse.js'
-    
-    console.log(document.querySelector('#app').outerHTML)
-    console.log(document.querySelector('#app').innerHTML)
-
+    import {parse} from './compile/parse.js'
+    import {optimizer} from './compile/optimizer.js'
+    import {generate} from './compile/generator.js'
     const ast = parse(document.querySelector('#app').outerHTML)
-    console.dir(ast)
-
+    optimizer(ast)
+    console.log(ast)
+    console.log(generate(ast))
   </script>
 </body>
 
