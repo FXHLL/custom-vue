@@ -62,6 +62,7 @@ function handleProxy(data, key, oldVal) {
         childOb.dep.depend()
       }
       dep.depend()
+      console.log(dep)
       return oldVal
     },
     set(newVal) {

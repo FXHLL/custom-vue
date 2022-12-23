@@ -19,14 +19,15 @@ function genElement(el) {
 function genText(node) {
   // 变量文本
   if (node.type === 2) {
-    return `_v(${node.expression})`
+    // debugger
+    return node.expression
   }
   // 注释
   if (node.type === 3 && node.isComment) {
     return `_e(${JSON.stringify(node.text)})`
     // 静态
   } else {
-    return `-v(${JSON.stringify(node.text)})`
+    return `_v(${JSON.stringify(node.text)})`
   }
 }
 
@@ -35,9 +36,10 @@ function genData(el) {
   let data = '{'
   el.attrsList.forEach((item, i) => {
     const isEnd = i === el.attrsList.length - 1
-    data += item[1] + ':' + JSON.stringify(item[3]) + isEnd ? '' : ','
+    const val = item[1] + ':' + JSON.stringify(item[3]) + (isEnd ? '' : ',')
+    data += val
   })
-  data = '}'
+  data += '}'
   return data
 }
 

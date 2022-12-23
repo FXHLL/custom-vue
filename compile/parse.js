@@ -192,7 +192,7 @@ function parseText(text) {
       tokens.push(text.slice(lastIndex, index))
     }
     // {{}}
-    tokens.push(`_s(${match[1].trim()})`)
+    tokens.push(`_v(${match[1].trim()})`)
     lastIndex = index + match[0].length
   }
   if (lastIndex < text.length) {

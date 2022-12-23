@@ -1,0 +1,98 @@
+class vNode {
+  constructor(tag, attrs, children, text, isComment) {
+    this.tag = tag
+    this.attrs = attrs
+    this.children = children
+    this.text = text
+    this.isComment = !!isComment
+  }
+}
+
+// ast - vNode
+// 元素节点
+function _c(tag, attrs, children) {
+  return new vNode(tag, attrs, children)
+}
+// 文本节点
+function _v(val) {
+  if (val === undefined || val === null) return
+  if (typeof val === 'object') {
+    return new vNode(null, null, null, val)
+  } else {
+    return new vNode(null, null, null, String(val))
+  }
+}
+// 注释节点
+function _e(val) {
+  return new vNode(null, null, null, val, true)
+}
+
+//对比新旧vNode
+function patch(oldnode, newnode) {
+  // debugger
+  // 第一次渲染
+  console.log('触发')
+  if (!!oldnode.nodeType) {
+    const dom = createElement(newnode)
+    let parent = oldnode.parentNode
+    parent.replaceChild(dom,oldnode)
+    return
+  }
+  // 更新
+  const dom = createElement(newnode)
+  // debugger
+  let parent = oldnode.el.parentNode
+  parent.replaceChild(dom,oldnode.el)
+  return
+
+}
+// vNode 转换 真实dom
+function createElement(vnode) {
+  // 文本类
+  if (!vnode.tag) {
+    let el
+    // debugger
+    if (!vnode.isComment) {
+      el = document.createTextNode(vnode.text)
+    } else {
+      el = document.createComment(vnode.text)
+    }
+    return el
+  }
+  // 元素
+  const el = document.createElement(vnode.tag)
+  const attrs = vnode.attrs
+  if (attrs) {
+    for (let key in attrs) {
+      switch (key) {
+        case 'style':
+          const styleList = attrs[key].split(';')
+          styleList.forEach(item => {
+            const k = item.split(':')[0]
+            const v = item.split(':')[1]
+            el.style[k] = v
+          })
+          break;
+        case 'id':
+          el.id = attrs[key]
+        case 'class':
+          el.class = attrs[key]
+      }
+    }
+  }
+  // 将渲染的dom挂到vnode上
+  vnode.el = el
+  if (vnode.children) {
+    vnode.children.map(createElement).forEach(childDom => {
+      el.appendChild(childDom)
+    })
+  }
+  return el
+}
+
+export {
+  _c,
+  _v,
+  _e,
+  patch
+}

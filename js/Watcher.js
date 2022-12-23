@@ -90,10 +90,10 @@ export default class Watcher {
     watcherQueue.add(this.id)
     Promise.resolve().then(() => {
       const oldValue = this.value
-      this.value = this.vm[this.express]
-      this.callback.call(this.vm, this.vm[this.express], oldValue)
+      // this.value = this.vm[this.express]
+      this.get()
+      this.callback.call(this.vm, this.value, oldValue)
       watcherQueue.delete(this.id)
     })
-
   }
 }
