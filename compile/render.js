@@ -1,5 +1,6 @@
 class vNode {
-  constructor(tag, attrs, children, text, isComment) {
+  constructor(type, tag, attrs, children, text, isComment) {
+    this.type = type
     this.tag = tag
     this.attrs = attrs
     this.children = children
@@ -11,7 +12,7 @@ class vNode {
 // ast - vNode
 // 元素节点
 function _c(tag, attrs, children) {
-  return new vNode(tag, attrs, children)
+  return new vNode( ,tag, attrs, children)
 }
 // 文本节点
 function _v(val) {
@@ -29,21 +30,33 @@ function _e(val) {
 
 //对比新旧vNode
 function patch(oldnode, newnode) {
-  // debugger
-  // 第一次渲染
+  // 旧节点为真实元素，首次渲染使用vnode直接渲染
   console.log('触发')
   if (!!oldnode.nodeType) {
     const dom = createElement(newnode)
     let parent = oldnode.parentNode
-    parent.replaceChild(dom,oldnode)
+    parent.replaceChild(dom, oldnode)
     return
   }
-  // 更新
-  const dom = createElement(newnode)
-  // debugger
-  let parent = oldnode.el.parentNode
-  parent.replaceChild(dom,oldnode.el)
-  return
+  // 新旧vNode更新策略：
+  // const dom = createElement(newnode)
+  // let parent = oldnode.el.parentNode
+  // parent.replaceChild(dom,oldnode.el)
+  // return
+  // 旧的dom
+  const dom = oldnode.el
+  // 对比差异
+  function loop(oldnode, newnode) {
+    for (let i = 0; i < newnode; i++) {
+      for (let j = 0; j < oldnode; j++) {
+        const oldN = oldnode[i]
+        const newN = newnode[j]
+        // oldN 和 newN 是同一个节点
+        if(oldN.nodeType)
+      }
+    }
+    loop(oldnode.children, newnode.children)
+  }
 
 }
 // vNode 转换 真实dom
