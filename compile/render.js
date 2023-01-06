@@ -1,5 +1,6 @@
 class vNode {
   constructor(type, tag, attrs, children, text, isComment) {
+    // 1元素节点 2文本节点 3注释节点
     this.type = type
     this.tag = tag
     this.attrs = attrs
@@ -12,20 +13,20 @@ class vNode {
 // ast - vNode
 // 元素节点
 function _c(tag, attrs, children) {
-  return new vNode( ,tag, attrs, children)
+  return new vNode(1, tag, attrs, children)
 }
 // 文本节点
 function _v(val) {
   if (val === undefined || val === null) return
   if (typeof val === 'object') {
-    return new vNode(null, null, null, val)
+    return new vNode(2, null, null, null, val)
   } else {
-    return new vNode(null, null, null, String(val))
+    return new vNode(2, null, null, null, String(val))
   }
 }
 // 注释节点
 function _e(val) {
-  return new vNode(null, null, null, val, true)
+  return new vNode(3, null, null, null, val, true)
 }
 
 //对比新旧vNode
@@ -39,24 +40,30 @@ function patch(oldnode, newnode) {
     return
   }
   // 新旧vNode更新策略：
-  // const dom = createElement(newnode)
-  // let parent = oldnode.el.parentNode
-  // parent.replaceChild(dom,oldnode.el)
-  // return
+  const dom = createElement(newnode)
+  let parent = oldnode.el.parentNode
+  parent.replaceChild(dom,oldnode.el)
+  return
   // 旧的dom
-  const dom = oldnode.el
-  // 对比差异
-  function loop(oldnode, newnode) {
-    for (let i = 0; i < newnode; i++) {
-      for (let j = 0; j < oldnode; j++) {
-        const oldN = oldnode[i]
-        const newN = newnode[j]
-        // oldN 和 newN 是同一个节点
-        if(oldN.nodeType)
-      }
-    }
-    loop(oldnode.children, newnode.children)
-  }
+  // const dom = oldnode.el
+  // // 对比差异
+  // function loop(oldnode, newnode) {
+  //   for (let i = 0; i < newnode; i++) {
+  //     for (let j = 0; j < oldnode; j++) {
+  //       const oldN = oldnode[i]
+  //       const newN = newnode[j]
+  //       // oldN 和 newN 是同一个节点
+  //       if (oldN.type === newN.type) {
+
+  //       }
+  //       // 不同节点
+  //       else {
+
+  //       }
+  //     }
+  //   }
+  //   loop(oldnode.children, newnode.children)
+  // }
 
 }
 // vNode 转换 真实dom
